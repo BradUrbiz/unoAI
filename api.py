@@ -33,20 +33,28 @@ def ai_move():
     hand = body.get('hand', [])
     top_card = body.get('top_card', {})
     current_color = body.get('current_color', top_card.get('color', ''))
+    difficulty = body.get('difficulty', 'hardcore')
 
-    print(f"\n=== AI MOVE REQUEST ===")
+    print(f"Difficulty: {difficulty}")
     print(f"Hand: {json.dumps(hand)}")
     print(f"Top card: {json.dumps(top_card)}")
     print(f"Current color: {current_color}")
     print(f"API_URL: {API_URL}")
     print(f"API_KEY set: {bool(API_KEY)}")
 
+    if difficulty == 'mild':
+        strategy = "Pick the 2nd best card to play from your hand (not the best one, the second best option)."
+    elif difficulty == 'lightwork':
+        strategy = "Pick the 3rd best card to play from your hand (not the best or second best, pick the 3rd best option). If you have fewer than 3 playable cards, pick the worst one."
+    else:
+        strategy = "Pick the best card to play from your hand."
+
     prompt = (
         f"You are playing Uno. Your hand is: {json.dumps(hand)}. "
         f"The top card on the discard pile is: {json.dumps(top_card)}. "
         f"The current color is: {current_color}. "
         f"A card can be played if it matches the current color, matches the top card's value, or is a wild card. "
-        f"Pick the best card to play from your hand. "
+        f"{strategy} "
         f"Respond with ONLY a JSON object like {{\"color\": \"red\", \"value\": \"5\"}} for the card you want to play. "
         f"If you cannot play any card, respond with {{\"action\": \"draw\"}}. "
         f"Do not include any other text, just the JSON."

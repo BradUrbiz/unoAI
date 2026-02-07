@@ -1,30 +1,30 @@
 [
   {
-    "color": "red",
-    "value": "9"
-  },
-  {
-    "color": "red",
-    "value": "2"
+    "color": "wild",
+    "value": "wild"
   },
   {
     "color": "blue",
-    "value": "5"
+    "value": "3"
   },
   {
-    "color": "green",
-    "value": "skip"
+    "color": "red",
+    "value": "3"
   },
   {
-    "color": "yellow",
+    "color": "blue",
+    "value": "4"
+  },
+  {
+    "color": "red",
+    "value": "1"
+  },
+  {
+    "color": "red",
+    "value": "8"
+  },
+  {
+    "color": "blue",
     "value": "9"
-  },
-  {
-    "color": "green",
-    "value": "skip"
-  },
-  {
-    "color": "yellow",
-    "value": "draw2"
   }
 ]

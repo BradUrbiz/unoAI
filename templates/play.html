@@ -176,6 +176,152 @@
         .status-msg.show {
             display: block;
         }
+        .color-picker-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .color-picker-overlay.show {
+            display: flex;
+        }
+        .color-picker {
+            background: #fff;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 24px #0008;
+        }
+        .color-picker h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.4rem;
+        }
+        .color-picker-btns {
+            display: flex;
+            gap: 1rem;
+        }
+        .color-picker-btns button {
+            width: 60px; height: 60px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.15s;
+        }
+        .color-picker-btns button:hover {
+            transform: scale(1.15);
+        }
+        .end-screen-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .end-screen-overlay.show {
+            display: flex;
+        }
+        .end-screen {
+            text-align: center;
+            padding: 3rem 4rem;
+            border-radius: 2rem;
+            box-shadow: 0 8px 40px #000a;
+        }
+        .end-screen.win {
+            background: linear-gradient(135deg, #2ecc40, #27ae38);
+        }
+        .end-screen.lose {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        .end-screen h1 {
+            font-size: 3rem;
+            color: #fff;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 2px 2px 8px #0005;
+        }
+        .end-screen p {
+            font-size: 1.3rem;
+            color: #fffc;
+            margin: 0 0 2rem 0;
+        }
+        .end-screen button {
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: transform 0.15s;
+            box-shadow: 0 2px 12px #0004;
+        }
+        .end-screen button:hover {
+            transform: scale(1.08);
+        }
+        .end-screen .play-again-btn {
+            background: #fff;
+            color: #333;
+            font-weight: bold;
+        }
+        .end-screen .menu-btn {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            font-weight: bold;
+        }
+        .difficulty-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 300;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .difficulty-overlay.show {
+            display: flex;
+        }
+        .difficulty-picker {
+            text-align: center;
+            padding: 2.5rem 3rem;
+            border-radius: 2rem;
+            background: #1a1a2e;
+            box-shadow: 0 8px 40px #000a;
+        }
+        .difficulty-picker h2 {
+            color: #fff;
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+        .difficulty-picker p {
+            color: #fff9;
+            margin: 0 0 1.5rem 0;
+            font-size: 1rem;
+        }
+        .difficulty-btns {
+            display: flex;
+            gap: 1rem;
+        }
+        .difficulty-btns button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.15s;
+            box-shadow: 0 2px 12px #0004;
+            color: #fff;
+        }
+        .difficulty-btns button:hover {
+            transform: scale(1.1);
+        }
+        .diff-lightwork { background: #2ecc40; }
+        .diff-mild { background: #f39c12; }
+        .diff-hardcore { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -194,7 +340,37 @@
     <div class="opponent-hand" id="opponent-hand"></div>
     <div class="opponent-middle-card" id="opponent-middle-card"></div>
     <div class="status-msg" id="status-msg"></div>
+    <div class="color-picker-overlay" id="color-picker-overlay">
+        <div class="color-picker">
+            <h3>Pick a color!</h3>
+            <div class="color-picker-btns">
+                <button style="background:#e74c3c" onclick="pickColor('red')"></button>
+                <button style="background:#f1c40f" onclick="pickColor('yellow')"></button>
+                <button style="background:#2ecc40" onclick="pickColor('green')"></button>
+                <button style="background:#3498db" onclick="pickColor('blue')"></button>
+            </div>
+        </div>
+    </div>
     <audio id="bg-music" src="../em.mp3" autoplay loop></audio>
+    <div class="difficulty-overlay show" id="difficulty-overlay">
+        <div class="difficulty-picker">
+            <h2>Choose Difficulty</h2>
+            <p>How smart should the AI be?</p>
+            <div class="difficulty-btns">
+                <button type="button" class="diff-lightwork" id="btn-lightwork">Lightwork</button>
+                <button type="button" class="diff-mild" id="btn-mild">Mild</button>
+                <button type="button" class="diff-hardcore" id="btn-hardcore">Hardcore</button>
+            </div>
+        </div>
+    </div>
+    <div class="end-screen-overlay" id="end-screen-overlay">
+        <div class="end-screen" id="end-screen">
+            <h1 id="end-title"></h1>
+            <p id="end-subtitle"></p>
+            <button class="play-again-btn" onclick="playAgain()">Play Again</button>
+            <button class="menu-btn" onclick="window.location.href='index.html'">Main Menu</button>
+        </div>
+    </div>
     <script>
         const bgMusic = document.getElementById('bg-music');
         bgMusic.volume = 0.4;
@@ -211,7 +387,45 @@
         let opponentHand = [];
         let currentTopCard = null;
         let currentColor = null;
-        let myTurn = true;
+        let myTurn = false;
+        let currentDifficulty = 'hardcore';
+
+        function startWithDifficulty(diff) {
+            currentDifficulty = diff;
+            var overlay = document.getElementById('difficulty-overlay');
+            overlay.classList.remove('show');
+            overlay.style.display = 'none';
+            myTurn = true;
+            startGame();
+        }
+
+        function startGame() {
+            currentHand = generateRandomCards(7);
+            opponentHand = generateRandomCards(7);
+            currentTopCard = getRandomCard();
+            currentColor = currentTopCard.color;
+            myTurn = true;
+            renderHand();
+            renderOpponentHand();
+            renderTopCard();
+            setRandomCharacter();
+        }
+
+        document.getElementById('btn-lightwork').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            startWithDifficulty('lightwork');
+        });
+        document.getElementById('btn-mild').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            startWithDifficulty('mild');
+        });
+        document.getElementById('btn-hardcore').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            startWithDifficulty('hardcore');
+        });
 
         document.getElementById('deck-draw').onclick = function() {
             if (!myTurn) return;
@@ -319,32 +533,17 @@
                 if (canPlay(playedCard, currentTopCard, currentColor)) {
                     currentHand.splice(idx, 1);
                     currentTopCard = playedCard;
-                    currentColor = playedCard.color === 'wild' ? currentColor : playedCard.color;
-                    renderHand();
-                    renderTopCard();
-                    if (currentHand.length === 0) {
-                        setTimeout(() => alert('You win! 🎉'), 300);
-                        return;
-                    }
-                    if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
-                        showStatus('Aw man, my turn got skipped! ⏭️');
-                        setTimeout(() => { hideStatus(); myTurn = true; }, 1200);
-                    } else if (playedCard.value === 'draw2') {
-                        const drawn = generateRandomCards(2);
-                        opponentHand.push(...drawn);
-                        renderOpponentHand();
-                        showStatus('Nooo I have to draw 2! +2 ⏭️');
-                        setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
-                    } else if (playedCard.value === 'wild4') {
-                        const drawn = generateRandomCards(4);
-                        opponentHand.push(...drawn);
-                        renderOpponentHand();
-                        showStatus('Are you serious?! I draw 4?! +4 ⏭️');
-                        setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+
+                    if (playedCard.color === 'wild') {
+                        renderHand();
+                        renderTopCard();
+                        pendingWildCard = playedCard;
+                        document.getElementById('color-picker-overlay').classList.add('show');
                     } else {
-                        myTurn = false;
-                        showStatus('Hmm... let me think 🤔');
-                        setTimeout(opponentTurn, 1000);
+                        currentColor = playedCard.color;
+                        renderHand();
+                        renderTopCard();
+                        afterPlayerPlay(playedCard);
                     }
                 } else {
                     showStatus('Can\'t play that card! Click the deck to draw.');
@@ -352,6 +551,67 @@
                 }
             };
             topDiv.appendChild(img);
+        }
+
+        let pendingWildCard = null;
+
+        function pickColor(color) {
+            document.getElementById('color-picker-overlay').classList.remove('show');
+            currentColor = color;
+            showStatus(`Color is now ${color.toUpperCase()}!`);
+            setTimeout(() => {
+                hideStatus();
+                if (pendingWildCard) {
+                    afterPlayerPlay(pendingWildCard);
+                    pendingWildCard = null;
+                }
+            }, 1000);
+        }
+
+        function showEndScreen(won) {
+            const overlay = document.getElementById('end-screen-overlay');
+            const screen = document.getElementById('end-screen');
+            const title = document.getElementById('end-title');
+            const subtitle = document.getElementById('end-subtitle');
+            screen.classList.remove('win', 'lose');
+            if (won) {
+                screen.classList.add('win');
+                title.textContent = 'You Win! 🎉';
+                subtitle.textContent = 'You got rid of all your cards!';
+            } else {
+                screen.classList.add('lose');
+                title.textContent = 'You Lose! 😢';
+                subtitle.textContent = 'The AI got rid of all its cards first...';
+            }
+            myTurn = false;
+            overlay.classList.add('show');
+        }
+
+        function afterPlayerPlay(playedCard) {
+            if (currentHand.length === 0) {
+                setTimeout(() => showEndScreen(true), 300);
+                return;
+            }
+            if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
+                showStatus('Aw man, my turn got skipped! ⏭️');
+                setTimeout(() => { hideStatus(); myTurn = true; }, 1200);
+            } else if (playedCard.value === 'draw2') {
+                const drawn = generateRandomCards(2);
+                opponentHand.push(...drawn);
+                renderOpponentHand();
+                showStatus('Nooo I have to draw 2! +2 ⏭️');
+                setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+            } else if (playedCard.value === 'wild4') {
+                const drawn = generateRandomCards(4);
+                opponentHand.push(...drawn);
+                renderOpponentHand();
+                showStatus('Are you serious?! I draw 4?! +4 ⏭️');
+                setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+            } else {
+                myTurn = false;
+                showStatus('Hmm... let me think 🤔');
+                setTimeout(opponentTurn, 1000);
+            }
         }
 
         async function opponentTurn() {
@@ -363,7 +623,8 @@
                     body: JSON.stringify({
                         hand: opponentHand,
                         top_card: currentTopCard,
-                        current_color: currentColor
+                        current_color: currentColor,
+                        difficulty: currentDifficulty
                     })
                 });
                 const move = await response.json();
@@ -391,7 +652,7 @@
                         renderTopCard();
                         if (opponentHand.length === 0) {
                             hideStatus();
-                            setTimeout(() => alert('Opponent wins! 😢'), 300);
+                            setTimeout(() => showEndScreen(false), 300);
                             return;
                         }
                         if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
@@ -437,29 +698,6 @@
             return { color, value };
         }
 
-        Promise.all([
-            fetch('../hand.json').then(r => r.json()),
-            fetch('../opponent_hand.json').then(r => r.json()).catch(() => {
-                const colors = ['red','yellow','green','blue'];
-                const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2'];
-                const hand = [];
-                for (let i = 0; i < 7; i++) {
-                    const c = colors[Math.floor(Math.random() * colors.length)];
-                    const v = values[Math.floor(Math.random() * values.length)];
-                    hand.push({ color: c, value: v });
-                }
-                return hand;
-            })
-        ]).then(([hand, oppHand]) => {
-            currentHand = hand;
-            opponentHand = oppHand;
-            currentTopCard = getRandomCard();
-            currentColor = currentTopCard.color;
-            renderHand();
-            renderOpponentHand();
-            renderTopCard();
-        });
-
         function setRandomCharacter() {
             const n = Math.floor(Math.random() * 13) + 1;
             const img = document.getElementById('character-img');
@@ -469,23 +707,19 @@
         setRandomCharacter();
 
         document.getElementById('restart-btn').onclick = function() {
-            fetch('http://localhost:3001/reshuffle', { method: 'POST' })
-                .then(() => Promise.all([
-                    fetch('../hand.json').then(r => r.json()),
-                    fetch('../opponent_hand.json').then(r => r.json())
-                ]))
-                .then(([hand, oppHand]) => {
-                    currentHand = hand;
-                    opponentHand = oppHand;
-                    currentTopCard = getRandomCard();
-                    currentColor = currentTopCard.color;
-                    myTurn = true;
-                    renderHand();
-                    renderOpponentHand();
-                    renderTopCard();
-                });
-            setRandomCharacter();
+            var overlay = document.getElementById('difficulty-overlay');
+            overlay.classList.add('show');
+            overlay.style.display = 'flex';
+            myTurn = false;
         };
+
+        function playAgain() {
+            document.getElementById('end-screen-overlay').classList.remove('show');
+            var overlay = document.getElementById('difficulty-overlay');
+            overlay.classList.add('show');
+            overlay.style.display = 'flex';
+            myTurn = false;
+        }
     </script>
 </body>
 </html>
