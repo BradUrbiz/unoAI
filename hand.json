@@ -1,30 +1,30 @@
 [
   {
-    "color": "red",
-    "value": "5"
+    "color": "blue",
+    "value": "3"
+  },
+  {
+    "color": "wild",
+    "value": "wild4"
+  },
+  {
+    "color": "yellow",
+    "value": "7"
+  },
+  {
+    "color": "blue",
+    "value": "9"
   },
   {
     "color": "green",
-    "value": "reverse"
+    "value": "6"
+  },
+  {
+    "color": "yellow",
+    "value": "9"
   },
   {
     "color": "blue",
-    "value": "7"
-  },
-  {
-    "color": "red",
-    "value": "8"
-  },
-  {
-    "color": "blue",
-    "value": "7"
-  },
-  {
-    "color": "blue",
-    "value": "2"
-  },
-  {
-    "color": "blue",
-    "value": "reverse"
+    "value": "0"
   }
 ]
