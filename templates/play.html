@@ -88,12 +88,18 @@
             background: #27ae38;
             transform: scale(1.05);
         }
-        .top-card {
+        .middle-cards {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 5;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+        .top-card {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -105,6 +111,71 @@
             border-radius: 8px;
             background: #fff8;
         }
+        .deck-card img {
+            height: 120px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #2225;
+            background: #fff8;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .deck-card img:hover {
+            transform: scale(1.08);
+        }
+        .opponent-hand {
+            position: fixed;
+            left: 50%;
+            top: 0;
+            right: auto;
+            transform: translateX(-50%);
+            margin: 0;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0;
+            z-index: 10;
+        }
+        .opponent-hand img {
+            height: 100px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #2225;
+            background: #fff8;
+        }
+        .opponent-middle-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateY(-80px);
+            z-index: 6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .opponent-middle-card img {
+            height: 120px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #2225;
+            background: #fff8;
+        }
+        .status-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 80px);
+            z-index: 50;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.3rem;
+            display: none;
+            text-align: center;
+        }
+        .status-msg.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -114,10 +185,71 @@
     <div class="hand" id="player-hand"></div>
     <img id="character-img" class="character-img" src="" alt="Character" />
     <button class="restart-btn" id="restart-btn">Restart Game</button>
-    <div class="top-card" id="top-card"></div>
+    <div class="middle-cards">
+        <div class="deck-card">
+            <img id="deck-draw" src="../Uno/individual/card back/card_back.png" alt="Card Back (click to draw)" />
+        </div>
+        <div class="top-card" id="top-card"></div>
+    </div>
+    <div class="opponent-hand" id="opponent-hand"></div>
+    <div class="opponent-middle-card" id="opponent-middle-card"></div>
+    <div class="status-msg" id="status-msg"></div>
     <script>
+        function showStatus(msg) {
+            const el = document.getElementById('status-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+        function hideStatus() {
+            document.getElementById('status-msg').classList.remove('show');
+        }
+        let currentHand = [];
+        let opponentHand = [];
+        let currentTopCard = null;
+        let currentColor = null;
+        let myTurn = true;
+
+        document.getElementById('deck-draw').onclick = function() {
+            if (!myTurn) return;
+            const hasPlayable = currentHand.some(c => canPlay(c, currentTopCard, currentColor));
+            if (hasPlayable) {
+                showStatus('You have a playable card! Pick one.');
+                setTimeout(hideStatus, 1500);
+                return;
+            }
+            const drawn = generateRandomCards(1);
+            currentHand.push(...drawn);
+            renderHand();
+            showStatus('You drew a card! AI\'s turn now.');
+            myTurn = false;
+            setTimeout(() => {
+                hideStatus();
+                showStatus('Hmm... let me think 🤔');
+                setTimeout(opponentTurn, 1000);
+            }, 1200);
+        };
+
+        function canPlay(card, topCard, color) {
+            return (
+                card.color === 'wild' ||
+                card.color === color ||
+                card.value === topCard.value
+            );
+        }
+
+        function generateRandomCards(count) {
+            const colors = ['red', 'yellow', 'green', 'blue'];
+            const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2'];
+            const cards = [];
+            for (let i = 0; i < count; i++) {
+                const c = colors[Math.floor(Math.random() * colors.length)];
+                const v = values[Math.floor(Math.random() * values.length)];
+                cards.push({ color: c, value: v });
+            }
+            return cards;
+        }
+
         function getCardImage(card) {
-        // Map JS card values to image filenames
             if (card.color === 'wild') {
                 if (card.value === 'wild4') {
                     return '../Uno/individual/wild/4_plus.png';
@@ -129,63 +261,201 @@
             if (value === 'skip') value = 'block';
             else if (value === 'reverse') value = 'inverse';
             else if (value === 'draw2') value = '2plus';
-            // else for numbers, value stays the same
             return `../Uno/individual/${card.color}/${value}_${card.color}.png`;
         }
 
-        function renderHand(hand) {
-            const handDiv = document.getElementById('player-hand'); //create img element
+        function renderHand() {
+            const handDiv = document.getElementById('player-hand');
             handDiv.innerHTML = '';
 
-            hand.forEach(card => {
+            currentHand.forEach((card, idx) => {
                 const label = document.createElement('label');
                 label.classList.add('card-option');
 
                 const radio = document.createElement('input');
                 radio.type = 'radio';
                 radio.name = 'selected-card';
-                radio.value = `${card.color} ${card.value}`;
-                handDiv.appendChild(radio);
+                radio.value = idx;
 
                 const img = document.createElement('img');
                 img.src = getCardImage(card);
                 img.alt = `${card.color} ${card.value}`;
+
                 label.appendChild(radio);
                 label.appendChild(img);
                 handDiv.appendChild(label);
             });
         }
 
-        function renderTopCard(card) {
+        function renderOpponentHand() {
+            const oppDiv = document.getElementById('opponent-hand');
+            oppDiv.innerHTML = '';
+            for (let i = 0; i < opponentHand.length; i++) {
+                const img = document.createElement('img');
+                img.src = '../Uno/individual/card back/card_back.png';
+                img.alt = 'Opponent Card Back';
+                oppDiv.appendChild(img);
+            }
+        }
+
+        function renderTopCard() {
             const topDiv = document.getElementById('top-card');
             topDiv.innerHTML = '';
-            if (!card) return;
+            if (!currentTopCard) return;
             const img = document.createElement('img');
-            img.src = getCardImage(card);
-            img.alt = `${card.color} ${card.value}`;
+            img.src = getCardImage(currentTopCard);
+            img.alt = `${currentTopCard.color} ${currentTopCard.value}`;
+            img.style.cursor = 'pointer';
+            img.onclick = function() {
+                if (!myTurn) return;
+                const selected = document.querySelector('input[name="selected-card"]:checked');
+                if (!selected) return;
+                const idx = parseInt(selected.value);
+                const playedCard = currentHand[idx];
+                if (canPlay(playedCard, currentTopCard, currentColor)) {
+                    currentHand.splice(idx, 1);
+                    currentTopCard = playedCard;
+                    currentColor = playedCard.color === 'wild' ? currentColor : playedCard.color;
+                    renderHand();
+                    renderTopCard();
+                    if (currentHand.length === 0) {
+                        setTimeout(() => alert('You win! 🎉'), 300);
+                        return;
+                    }
+                    if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
+                        showStatus('Opponent\'s turn is skipped! ⏭️');
+                        setTimeout(() => { hideStatus(); myTurn = true; }, 1200);
+                    } else if (playedCard.value === 'draw2') {
+                        const drawn = generateRandomCards(2);
+                        opponentHand.push(...drawn);
+                        renderOpponentHand();
+                        showStatus('Opponent draws 2 cards! +2 ⏭️');
+                        setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+                    } else if (playedCard.value === 'wild4') {
+                        const drawn = generateRandomCards(4);
+                        opponentHand.push(...drawn);
+                        renderOpponentHand();
+                        showStatus('Opponent draws 4 cards! +4 ⏭️');
+                        setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+                    } else {
+                        myTurn = false;
+                        showStatus('Hmm... let me think 🤔');
+                        setTimeout(opponentTurn, 1000);
+                    }
+                } else {
+                    showStatus('Can\'t play that card! Click the deck to draw.');
+                    setTimeout(hideStatus, 2000);
+                }
+            };
             topDiv.appendChild(img);
         }
 
-        // Example: show a random card as top card
-        function getRandomCard() {
-            const colors = ['red', 'yellow', 'green', 'blue', 'wild'];
-            const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2','wild','wild4'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            let value;
-            if (color === 'wild') {
-                value = values.slice(-2)[Math.floor(Math.random() * 2)];
-            } else {
-                value = values[Math.floor(Math.random() * 13)];
+        async function opponentTurn() {
+            showStatus('Hmm... let me think 🤔');
+            try {
+                const response = await fetch('http://localhost:5000/ai-move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        hand: opponentHand,
+                        top_card: currentTopCard,
+                        current_color: currentColor
+                    })
+                });
+                const move = await response.json();
+
+                if (move.action === 'draw') {
+                    const drawn = generateRandomCards(1);
+                    opponentHand.push(...drawn);
+                    renderOpponentHand();
+                    showStatus('I\'ll draw a card...');
+                    setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+                    return;
+                }
+
+                const idx = opponentHand.findIndex(c =>
+                    c.color === move.color && c.value === move.value
+                );
+
+                if (idx !== -1 && canPlay(opponentHand[idx], currentTopCard, currentColor)) {
+                    const playedCard = opponentHand.splice(idx, 1)[0];
+                    showStatus(`Maybe this one! [${playedCard.color.toUpperCase()} ${playedCard.value.toUpperCase()}]`);
+                    currentTopCard = playedCard;
+                    currentColor = playedCard.color === 'wild' ? currentColor : playedCard.color;
+                    renderOpponentHand();
+                    setTimeout(() => {
+                        renderTopCard();
+                        if (opponentHand.length === 0) {
+                            hideStatus();
+                            setTimeout(() => alert('Opponent wins! 😢'), 300);
+                            return;
+                        }
+                        if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
+                            showStatus('Your turn is skipped! AI goes again ⏭️');
+                            setTimeout(() => opponentTurn(), 1500);
+                        } else if (playedCard.value === 'draw2') {
+                            const drawn = generateRandomCards(2);
+                            currentHand.push(...drawn);
+                            renderHand();
+                            showStatus('You draw 2 cards! +2 ⏭️ AI goes again');
+                            setTimeout(() => opponentTurn(), 2000);
+                        } else if (playedCard.value === 'wild4') {
+                            const drawn = generateRandomCards(4);
+                            currentHand.push(...drawn);
+                            renderHand();
+                            showStatus('You draw 4 cards! +4 ⏭️ AI goes again');
+                            setTimeout(() => opponentTurn(), 2000);
+                        } else {
+                            hideStatus();
+                            myTurn = true;
+                        }
+                    }, 1500);
+                    return;
+                } else {
+                    const drawn = generateRandomCards(1);
+                    opponentHand.push(...drawn);
+                    renderOpponentHand();
+                    showStatus('I can\'t play... drawing a card.');
+                    setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
+                    return;
+                }
+            } catch (err) {
+                showStatus('Error contacting AI! Your turn.');
+                setTimeout(() => { hideStatus(); myTurn = true; }, 2000);
             }
+        }
+
+        function getRandomCard() {
+            const colors = ['red', 'yellow', 'green', 'blue'];
+            const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const value = values[Math.floor(Math.random() * values.length)];
             return { color, value };
         }
 
-        fetch('../hand.json')
-            .then(res => res.json())
-            .then(hand => renderHand(hand));
-        
-        
-        // Display a random character image (char_1.png to char_13.png)
+        Promise.all([
+            fetch('../hand.json').then(r => r.json()),
+            fetch('../opponent_hand.json').then(r => r.json()).catch(() => {
+                const colors = ['red','yellow','green','blue'];
+                const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2'];
+                const hand = [];
+                for (let i = 0; i < 7; i++) {
+                    const c = colors[Math.floor(Math.random() * colors.length)];
+                    const v = values[Math.floor(Math.random() * values.length)];
+                    hand.push({ color: c, value: v });
+                }
+                return hand;
+            })
+        ]).then(([hand, oppHand]) => {
+            currentHand = hand;
+            opponentHand = oppHand;
+            currentTopCard = getRandomCard();
+            currentColor = currentTopCard.color;
+            renderHand();
+            renderOpponentHand();
+            renderTopCard();
+        });
+
         function setRandomCharacter() {
             const n = Math.floor(Math.random() * 13) + 1;
             const img = document.getElementById('character-img');
@@ -196,13 +466,22 @@
 
         document.getElementById('restart-btn').onclick = function() {
             fetch('http://localhost:3001/reshuffle', { method: 'POST' })
-                .then(() => fetch('../hand.json'))
-                .then(res => res.json())
-                .then(hand => renderHand(hand));
+                .then(() => Promise.all([
+                    fetch('../hand.json').then(r => r.json()),
+                    fetch('../opponent_hand.json').then(r => r.json())
+                ]))
+                .then(([hand, oppHand]) => {
+                    currentHand = hand;
+                    opponentHand = oppHand;
+                    currentTopCard = getRandomCard();
+                    currentColor = currentTopCard.color;
+                    myTurn = true;
+                    renderHand();
+                    renderOpponentHand();
+                    renderTopCard();
+                });
             setRandomCharacter();
         };
-
-        renderTopCard(getRandomCard());
     </script>
 </body>
 </html>

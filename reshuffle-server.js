@@ -46,7 +46,15 @@ app.post('/reshuffle', (req, res) => {
   shuffle(deck);
   const hand = [];
   for (let i = 0; i < 7; i++) hand.push(deck.pop());
+  const opponentHand = [];
+  for (let i = 0; i < 7; i++) opponentHand.push(deck.pop());
+  let topCard;
+  do {
+    topCard = deck.pop();
+  } while (topCard.color === 'wild');
   fs.writeFileSync('hand.json', JSON.stringify(hand, null, 2));
+  fs.writeFileSync('opponent_hand.json', JSON.stringify(opponentHand, null, 2));
+  fs.writeFileSync('topcard.json', JSON.stringify(topCard, null, 2));
   res.json({ success: true });
 });
 
