@@ -5,26 +5,26 @@
   },
   {
     "color": "green",
-    "value": "reverse"
+    "value": "skip"
+  },
+  {
+    "color": "yellow",
+    "value": "4"
   },
   {
     "color": "blue",
     "value": "7"
   },
   {
-    "color": "red",
-    "value": "8"
-  },
-  {
-    "color": "blue",
-    "value": "7"
-  },
-  {
-    "color": "blue",
+    "color": "yellow",
     "value": "2"
   },
   {
-    "color": "blue",
+    "color": "yellow",
     "value": "reverse"
+  },
+  {
+    "color": "yellow",
+    "value": "skip"
   }
 ]

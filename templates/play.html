@@ -88,6 +88,23 @@
             background: #27ae38;
             transform: scale(1.05);
         }
+        .top-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .top-card img {
+            height: 120px;
+            width: auto;
+            box-shadow: 0 2px 8px #2225;
+            border-radius: 8px;
+            background: #fff8;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +114,7 @@
     <div class="hand" id="player-hand"></div>
     <img id="character-img" class="character-img" src="" alt="Character" />
     <button class="restart-btn" id="restart-btn">Restart Game</button>
+    <div class="top-card" id="top-card"></div>
     <script>
         function getCardImage(card) {
             if (card.color === 'wild') {
@@ -125,6 +143,30 @@
             });
         }
 
+        function renderTopCard(card) {
+            const topDiv = document.getElementById('top-card');
+            topDiv.innerHTML = '';
+            if (!card) return;
+            const img = document.createElement('img');
+            img.src = getCardImage(card);
+            img.alt = `${card.color} ${card.value}`;
+            topDiv.appendChild(img);
+        }
+
+        // Example: show a random card as top card
+        function getRandomCard() {
+            const colors = ['red', 'yellow', 'green', 'blue', 'wild'];
+            const values = ['0','1','2','3','4','5','6','7','8','9','skip','reverse','draw2','wild','wild4'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            let value;
+            if (color === 'wild') {
+                value = values.slice(-2)[Math.floor(Math.random() * 2)];
+            } else {
+                value = values[Math.floor(Math.random() * 13)];
+            }
+            return { color, value };
+        }
+
         fetch('../hand.json')
             .then(res => res.json())
             .then(hand => renderHand(hand));
@@ -145,6 +187,8 @@
                 .then(hand => renderHand(hand));
             setRandomCharacter();
         };
+
+        renderTopCard(getRandomCard());
     </script>
 </body>
 </html>
