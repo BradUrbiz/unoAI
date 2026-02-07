@@ -77,5 +77,20 @@
         }
     </style>
     </div>
+    <audio id="bg-music" src="../lobby.mp3" loop></audio>
+    <script>
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.4;
+        const saved = sessionStorage.getItem('lobbyMusicTime');
+        if (saved) bgMusic.currentTime = parseFloat(saved);
+        function tryPlay() { bgMusic.play().catch(() => {}); }
+        tryPlay();
+        document.addEventListener('click', tryPlay);
+        document.addEventListener('keydown', tryPlay);
+        document.addEventListener('touchstart', tryPlay);
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('lobbyMusicTime', bgMusic.currentTime);
+        });
+    </script>
 </body>
 </html>

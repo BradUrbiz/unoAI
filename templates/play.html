@@ -194,7 +194,11 @@
     <div class="opponent-hand" id="opponent-hand"></div>
     <div class="opponent-middle-card" id="opponent-middle-card"></div>
     <div class="status-msg" id="status-msg"></div>
+    <audio id="bg-music" src="../em.mp3" autoplay loop></audio>
     <script>
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.4;
+        document.addEventListener('click', () => { bgMusic.play(); }, { once: true });
         function showStatus(msg) {
             const el = document.getElementById('status-msg');
             el.textContent = msg;
@@ -220,7 +224,7 @@
             const drawn = generateRandomCards(1);
             currentHand.push(...drawn);
             renderHand();
-            showStatus('You drew a card! AI\'s turn now.');
+            showStatus('You drew a card! My turn now.');
             myTurn = false;
             setTimeout(() => {
                 hideStatus();
@@ -323,19 +327,19 @@
                         return;
                     }
                     if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
-                        showStatus('Opponent\'s turn is skipped! ⏭️');
+                        showStatus('Aw man, my turn got skipped! ⏭️');
                         setTimeout(() => { hideStatus(); myTurn = true; }, 1200);
                     } else if (playedCard.value === 'draw2') {
                         const drawn = generateRandomCards(2);
                         opponentHand.push(...drawn);
                         renderOpponentHand();
-                        showStatus('Opponent draws 2 cards! +2 ⏭️');
+                        showStatus('Nooo I have to draw 2! +2 ⏭️');
                         setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
                     } else if (playedCard.value === 'wild4') {
                         const drawn = generateRandomCards(4);
                         opponentHand.push(...drawn);
                         renderOpponentHand();
-                        showStatus('Opponent draws 4 cards! +4 ⏭️');
+                        showStatus('Are you serious?! I draw 4?! +4 ⏭️');
                         setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
                     } else {
                         myTurn = false;
@@ -368,7 +372,7 @@
                     const drawn = generateRandomCards(1);
                     opponentHand.push(...drawn);
                     renderOpponentHand();
-                    showStatus('I\'ll draw a card...');
+                    showStatus('Hmm nothing works... let me draw 😔');
                     setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
                     return;
                 }
@@ -379,7 +383,7 @@
 
                 if (idx !== -1 && canPlay(opponentHand[idx], currentTopCard, currentColor)) {
                     const playedCard = opponentHand.splice(idx, 1)[0];
-                    showStatus(`Maybe this one! [${playedCard.color.toUpperCase()} ${playedCard.value.toUpperCase()}]`);
+                    showStatus(`Ooh how about this! ${playedCard.color.toUpperCase()} ${playedCard.value.toUpperCase()} 😏`);
                     currentTopCard = playedCard;
                     currentColor = playedCard.color === 'wild' ? currentColor : playedCard.color;
                     renderOpponentHand();
@@ -391,19 +395,19 @@
                             return;
                         }
                         if (playedCard.value === 'skip' || playedCard.value === 'reverse') {
-                            showStatus('Your turn is skipped! AI goes again ⏭️');
+                            showStatus('Haha, skipped! My turn again ⏭️');
                             setTimeout(() => opponentTurn(), 1500);
                         } else if (playedCard.value === 'draw2') {
                             const drawn = generateRandomCards(2);
                             currentHand.push(...drawn);
                             renderHand();
-                            showStatus('You draw 2 cards! +2 ⏭️ AI goes again');
+                            showStatus('Take these 2 cards! +2 My turn again 😈');
                             setTimeout(() => opponentTurn(), 2000);
                         } else if (playedCard.value === 'wild4') {
                             const drawn = generateRandomCards(4);
                             currentHand.push(...drawn);
                             renderHand();
-                            showStatus('You draw 4 cards! +4 ⏭️ AI goes again');
+                            showStatus('Eat these 4 cards! +4 My turn again 😈');
                             setTimeout(() => opponentTurn(), 2000);
                         } else {
                             hideStatus();
@@ -415,12 +419,12 @@
                     const drawn = generateRandomCards(1);
                     opponentHand.push(...drawn);
                     renderOpponentHand();
-                    showStatus('I can\'t play... drawing a card.');
+                    showStatus('I got nothing... drawing a card 😔');
                     setTimeout(() => { hideStatus(); myTurn = true; }, 1500);
                     return;
                 }
             } catch (err) {
-                showStatus('Error contacting AI! Your turn.');
+                showStatus('Ugh, my brain glitched... your turn.');
                 setTimeout(() => { hideStatus(); myTurn = true; }, 2000);
             }
         }
