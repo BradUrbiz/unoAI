@@ -6,6 +6,40 @@
     <title>unoAI - Play</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        .table-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            width: 600px;
+            height: 350px;
+            pointer-events: none;
+        }
+        .portrait-above-table {
+            position: fixed;
+            left: 50%;
+            top: calc(50% - 220px);
+            transform: translateX(-50%);
+            z-index: 2;
+            height: 120px;
+        }
+        .table-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .portrait-above-table {
+            position: fixed;
+            left: 50%;
+            top: calc(50% - 220px);
+            transform: translateX(-50%);
+            z-index: 2;
+            height: 120px;
+        }
         .hand {
             position: fixed;
             left: 0;
@@ -65,6 +99,24 @@
                 handDiv.appendChild(img);
             });
         }
+        function insertTableImage() {
+            const tableImg = document.createElement('img');
+            tableImg.src = '../Tables/blue_table.png';
+            tableImg.alt = 'UNO Table';
+            tableImg.className = 'table-bg';
+            document.body.appendChild(tableImg);
+        }
+
+        function insertCharacterAboveTable() {
+            const charImg = document.createElement('img');
+            charImg.src = '../Assets/character.png';
+            charImg.alt = 'Character';
+            charImg.className = 'portrait-above-table';
+            document.body.appendChild(charImg);
+        }
+
+        insertTableImage();
+        insertCharacterAboveTable();
 
         renderHand();
     </script>
