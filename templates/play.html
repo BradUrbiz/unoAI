@@ -22,9 +22,28 @@
             box-shadow: 0 2px 8px #2225;
             background: #fff8;
         }
+        .center-table {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .center-table img {
+            max-width: 60vw;
+            max-height: 60vh;
+            border-radius: 0;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
+    <div class="center-table">
+        <img src="../Tables/table_green.png.png" alt="Table Green" />
+    </div>
     <div class="hand" id="player-hand"></div>
     <script>
         function getCardImage(card) {
