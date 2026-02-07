@@ -8,15 +8,15 @@
     <style>
         .hand {
             position: fixed;
-                left: 50%;
-                bottom: 0;
-                right: auto;
+            left: 50%;
+            bottom: 0;
+            right: auto;
                 transform: translateX(-50%);
                 margin: 0;
-                display: flex;
-                gap: 0.5rem;
-                padding: 0;
-                z-index: 10;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0;
+            z-index: 10;
         }
         .hand img {
             height: 100px;
@@ -99,6 +99,7 @@
     <button class="restart-btn" id="restart-btn">Restart Game</button>
     <script>
         function getCardImage(card) {
+        // Map JS card values to image filenames
             if (card.color === 'wild') {
                 if (card.value === 'wild4') {
                     return '../Uno/individual/wild/4_plus.png';
@@ -115,20 +116,33 @@
         }
 
         function renderHand(hand) {
-            const handDiv = document.getElementById('player-hand');
+            const handDiv = document.getElementById('player-hand'); //create img element
             handDiv.innerHTML = '';
+
             hand.forEach(card => {
+                const label = document.createElement('label');
+                label.classList.add('card-option');
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'selected-card';
+                radio.value = `${card.color} ${card.value}`;
+                handDiv.appendChild(radio);
+
                 const img = document.createElement('img');
                 img.src = getCardImage(card);
                 img.alt = `${card.color} ${card.value}`;
-                handDiv.appendChild(img);
+                label.appendChild(radio);
+                label.appendChild(img);
+                handDiv.appendChild(label);
             });
         }
 
         fetch('../hand.json')
             .then(res => res.json())
             .then(hand => renderHand(hand));
-
+        
+        
         // Display a random character image (char_1.png to char_13.png)
         function setRandomCharacter() {
             const n = Math.floor(Math.random() * 13) + 1;
