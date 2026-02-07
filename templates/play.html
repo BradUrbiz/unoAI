@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>unoAI - Play</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .hand {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            z-index: 10;
+        }
+        .hand img {
+            height: 100px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #2225;
+            background: #fff8;
+        }
+    </style>
+</head>
+<body>
+    <div class="hand" id="player-hand"></div>
+    <script>
+        // Example hand, replace with actual game logic
+        const hand = [
+            { color: 'green', numberSpecial: '1' },
+            { color: 'red', numberSpecial: 'block' },
+            { color: 'yellow', numberSpecial: '2plus' },
+            { color: 'blue', numberSpecial: 'inverse' },
+            { color: 'wild', numberSpecial: '' },
+            { color: 'wild', numberSpecial: 'draw four' },
+            { color: 'green', numberSpecial: '7' }
+        ];
+
+        function getCardImage(card) {
+            if (card.color === 'wild') {
+                if (card.numberSpecial === 'draw four') {
+                    return '../Uno/individual/wild/4_plus.png';
+                } else {
+                    return '../Uno/individual/wild/wild_card.png';
+                }
+            }
+            let value = card.numberSpecial;
+            if (value === 'block') value = 'block';
+            else if (value === 'inverse') value = 'inverse';
+            else if (value === '2plus') value = '2plus';
+            else if (!isNaN(Number(value))) value = value;
+            else value = card.numberSpecial;
+            return `../Uno/individual/${card.color}/${value}_${card.color}.png`;
+        }
+
+        function renderHand() {
+            const handDiv = document.getElementById('player-hand');
+            handDiv.innerHTML = '';
+            hand.forEach(card => {
+                const img = document.createElement('img');
+                img.src = getCardImage(card);
+                img.alt = `${card.color} ${card.numberSpecial}`;
+                handDiv.appendChild(img);
+            });
+        }
+
+        renderHand();
+    </script>
+</body>
+</html>
