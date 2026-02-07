@@ -1,204 +1,238 @@
-// Baby Uno in JavaScript
-// Converted from C++
-// Authors: Shruthi Venkatesh, Yasha Zbarsky
+/*
+Real UNO - Console Version
+Rules: Official UNO rules
+Players: 2
+*/
 
-// ----------------------
-// Card Structure
-// ----------------------
+const readline = require("readline-sync");
+
+// -------------------- Card --------------------
 class Card {
-    constructor(color, numberSpecial) {
-        this.color = color;
-        this.numberSpecial = numberSpecial;
-    }
+  constructor(color, value) {
+    this.color = color; // red, yellow, green, blue, wild
+    this.value = value; // 0-9, skip, reverse, draw2, wild, wild4
+  }
+
+  toString() {
+    return `[${this.color.toUpperCase()} ${this.value.toUpperCase()}]`;
+  }
 }
 
-// ----------------------
-// Utility Functions
-// ----------------------
-function wait(seconds) {
-    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
-}
-
-function showSingleCard(card) {
-    console.log(`[${card.color} ${card.numberSpecial}]`);
-}
-
-function showMultipleCards(cards) {
-    cards.forEach(c => showSingleCard(c));
-}
-
-// ----------------------
-// Deck Creation
-// ----------------------
+// -------------------- Deck --------------------
 function createDeck() {
-    const deck = [];
-    let colors = ["red", "green", "blue", "yellow"];
+  const colors = ["red", "yellow", "green", "blue"];
+  const deck = [];
 
-    // 80 colored cards
-    for (let i = 0; i < 80; i++) {
-        let color = colors[Math.floor(i / 20)];
-        let num = (i % 10).toString();
-        deck.push(new Card(color, num));
+  for (let color of colors) {
+    deck.push(new Card(color, "0"));
+
+    for (let i = 1; i <= 9; i++) {
+      deck.push(new Card(color, i.toString()));
+      deck.push(new Card(color, i.toString()));
     }
 
-    // 4 wild
-    for (let i = 0; i < 4; i++) deck.push(new Card("wild", ""));
+    ["skip", "reverse", "draw2"].forEach(action => {
+      deck.push(new Card(color, action));
+      deck.push(new Card(color, action));
+    });
+  }
 
-    // 4 draw four
-    for (let i = 0; i < 4; i++) deck.push(new Card("wild", "draw four"));
+  for (let i = 0; i < 4; i++) {
+    deck.push(new Card("wild", "wild"));
+    deck.push(new Card("wild", "wild4"));
+  }
 
-    return deck;
+  return deck;
 }
 
-// ----------------------
-// Shuffle
-// ----------------------
 function shuffle(deck) {
-    for (let i = 0; i < 50; i++) {
-        let a = Math.floor(Math.random() * deck.length);
-        let b = Math.floor(Math.random() * deck.length);
-        [deck[a], deck[b]] = [deck[b], deck[a]];
-    }
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
 }
 
-// ----------------------
-// Move discard → deck
-// ----------------------
-function moveDiscardToDeck(deck, discard) {
-    const top = discard.pop();
-    deck.push(...discard);
-    discard.length = 0;
-    discard.push(top);
-    shuffle(deck);
-}
-
-// ----------------------
-// Deal cards
-// ----------------------
-function deal(deck, hand, discard, count) {
-    for (let i = 0; i < count; i++) {
-        if (deck.length === 0) moveDiscardToDeck(deck, discard);
-        hand.push(deck.pop());
-    }
-}
-
-// ----------------------
-// Setup Game
-// ----------------------
+// -------------------- Game Setup --------------------
 function setupGame() {
-    let deck = createDeck();
-    shuffle(deck);
+  const deck = createDeck();
+  shuffle(deck);
 
-    let discard = [];
-    let p1 = [];
-    let p2 = [];
+  const players = [
+    { name: "Player 1", hand: [] },
+    { name: "Player 2", hand: [] }
+  ];
 
-    deal(deck, p1, discard, 7);
-    deal(deck, p2, discard, 7);
+  for (let i = 0; i < 7; i++) {
+    players.forEach(p => p.hand.push(deck.pop()));
+  }
 
-    discard.push(deck.pop());
+  let topCard;
+  do {
+    topCard = deck.pop();
+  } while (topCard.color === "wild");
 
-    return { deck, discard, p1, p2 };
+  return {
+    deck,
+    discard: [topCard],
+    players,
+    currentPlayer: 0,
+    direction: 1,
+    currentColor: topCard.color,
+    drawCount: 0,
+    skipNext: false
+  };
 }
 
-// ----------------------
-// Check if move is valid
-// ----------------------
-function checkMove(played, top) {
-    return (
-        played.color === top.color ||
-        played.numberSpecial === top.numberSpecial ||
-        played.color === "wild" ||
-        played.numberSpecial === "draw four"
+// -------------------- Helpers --------------------
+function canPlay(card, topCard, currentColor) {
+  return (
+    card.color === "wild" ||
+    card.color === currentColor ||
+    card.value === topCard.value
+  );
+}
+
+function drawCards(player, game, count) {
+  for (let i = 0; i < count; i++) {
+    if (game.deck.length === 0) {
+      const top = game.discard.pop();
+      game.deck = game.discard;
+      game.discard = [top];
+      shuffle(game.deck);
+    }
+    player.hand.push(game.deck.pop());
+  }
+}
+
+function chooseWildColor() {
+  const colors = ["red", "yellow", "green", "blue"];
+  let choice;
+
+  do {
+    choice = readline.question(
+      "Choose a color (red, yellow, green, blue): "
+    ).toLowerCase();
+  } while (!colors.includes(choice));
+
+  return choice;
+}
+
+function applyCardEffect(card, game) {
+  switch (card.value) {
+    case "skip":
+      game.skipNext = true;
+      break;
+    case "reverse":
+      game.direction *= -1;
+      break;
+    case "draw2":
+      game.drawCount = 2;
+      game.skipNext = true;
+      break;
+    case "wild4":
+      game.drawCount = 4;
+      game.skipNext = true;
+      break;
+  }
+}
+
+// -------------------- Turn Logic --------------------
+function showHand(player) {
+  console.log(`\n${player.name}'s hand:`);
+  player.hand.forEach((c, i) => {
+    console.log(`${i + 1}: ${c.toString()}`);
+  });
+}
+
+function takeTurn(game) {
+  const player = game.players[game.currentPlayer];
+  const topCard = game.discard[game.discard.length - 1];
+
+  console.clear();
+  console.log(`Top Card: ${topCard.toString()}`);
+  console.log(`Current Color: ${game.currentColor.toUpperCase()}`);
+  showHand(player);
+
+  if (game.drawCount > 0) {
+    console.log(`You must draw ${game.drawCount} cards.`);
+    drawCards(player, game, game.drawCount);
+    game.drawCount = 0;
+    return;
+  }
+
+  let playableIndexes = player.hand
+    .map((c, i) => (canPlay(c, topCard, game.currentColor) ? i : -1))
+    .filter(i => i !== -1);
+
+  if (playableIndexes.length === 0) {
+    console.log("No playable cards. Drawing one...");
+    drawCards(player, game, 1);
+    return;
+  }
+
+  let choice;
+  do {
+    choice = readline.questionInt(
+      "\nChoose a card number to play (or 0 to draw): "
     );
+  } while (choice < 0 || choice > player.hand.length);
+
+  if (choice === 0) {
+    drawCards(player, game, 1);
+    return;
+  }
+
+  const card = player.hand[choice - 1];
+
+  if (!canPlay(card, topCard, game.currentColor)) {
+    console.log("Invalid move!");
+    readline.question("Press Enter...");
+    return;
+  }
+
+  player.hand.splice(choice - 1, 1);
+  game.discard.push(card);
+
+  if (card.color === "wild") {
+    game.currentColor = chooseWildColor();
+  } else {
+    game.currentColor = card.color;
+  }
+
+  applyCardEffect(card, game);
+
+  if (player.hand.length === 1) {
+    console.log("UNO!");
+    readline.question("Press Enter...");
+  }
 }
 
-// ----------------------
-// Player Turn
-// ----------------------
-async function playerTurn(hand, discard, deck, turn, playerName) {
-    console.log(`\n${playerName}'s turn`);
-    console.log("Your hand:");
-    showMultipleCards(hand);
+// -------------------- Next Player --------------------
+function nextPlayer(game) {
+  let step = game.skipNext ? 2 : 1;
+  game.skipNext = false;
 
-    console.log("\nTop card:");
-    showSingleCard(discard[discard.length - 1]);
-
-    const prompt = require("prompt-sync")();
-
-    while (true) {
-        console.log("\n1) Play a card");
-        console.log("2) Draw a card");
-        let choice = prompt("> ");
-
-        if (choice === "1") {
-            let index = parseInt(prompt("Which card number? ")) - 1;
-
-            if (index < 0 || index >= hand.length) {
-                console.log("Invalid card.");
-                continue;
-            }
-
-            if (!checkMove(hand[index], discard[discard.length - 1])) {
-                console.log("Invalid move.");
-                continue;
-            }
-
-            discard.push(hand[index]);
-            hand.splice(index, 1);
-            break;
-        }
-
-        if (choice === "2") {
-            deal(deck, hand, discard, 1);
-            break;
-        }
-
-        console.log("Invalid choice.");
-    }
-
-    return turn + 1;
+  game.currentPlayer =
+    (game.currentPlayer + step * game.direction + game.players.length) %
+    game.players.length;
 }
 
-// ----------------------
-// Finish Actions
-// ----------------------
-function finishActions(discard, deck, hand, turn) {
-    const last = discard[discard.length - 1];
+// -------------------- Main --------------------
+function main() {
+  const game = setupGame();
 
-    if (last.numberSpecial === "draw two") {
-        deal(deck, hand, discard, 2);
-    } else if (last.numberSpecial === "draw four") {
-        deal(deck, hand, discard, 4);
-    } else if (last.numberSpecial === "skip") {
-        turn++;
+  while (true) {
+    takeTurn(game);
+
+    const player = game.players[game.currentPlayer];
+    if (player.hand.length === 0) {
+      console.clear();
+      console.log(`${player.name} WINS! 🏆`);
+      break;
     }
 
-    return turn;
-}
-
-// ----------------------
-// Main Game Loop
-// ----------------------
-async function main() {
-    const prompt = require("prompt-sync")();
-
-    let { deck, discard, p1, p2 } = setupGame();
-    let turn = 1;
-
-    while (p1.length > 0 && p2.length > 0) {
-        console.clear();
-
-        if (turn % 2 !== 0) {
-            turn = await playerTurn(p1, discard, deck, turn, "Player 1");
-            turn = finishActions(discard, deck, p2, turn);
-        } else {
-            turn = await playerTurn(p2, discard, deck, turn, "Player 2");
-            turn = finishActions(discard, deck, p1, turn);
-        }
-    }
-
-    console.log("\n\n" + (p1.length === 0 ? "PLAYER ONE WINS!" : "PLAYER TWO WINS!"));
+    nextPlayer(game);
+  }
 }
 
 main();
